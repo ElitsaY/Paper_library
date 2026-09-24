@@ -16,6 +16,18 @@
 */
 window.PAPERS = [
   {
+    id: "llm-code-detection",
+    title: "Stylometric Code Detection",
+    fullTitle: "FMI_SU_Yotkova_Kastreva at SemEval-2026 Task 13: Lightweight Detection of LLM-Generated Code via Stylometric Signals",
+    authors: "Yotkova, Kastreva, Dimitrov, Koychev, Nakov",
+    venue: "SemEval",
+    year: 2026,
+    hook: "Pretrained code encoders collapse on unseen languages. Two comment ratios, a depth-2 decision tree and two data-driven rules reach 67.35 macro-F1 (top 15%) on CPU alone.",
+    interactive: "Paste code and watch each line get tagged, the ratios computed and the rules fire.",
+    topics: ["LLM-generated code", "Stylometry", "Interpretable ML", "LLMs"],
+    accent: "teal"
+  },
+  {
     id: "leandojo",
     title: "LeanDojo",
     fullTitle: "LeanDojo: Theorem Proving with Retrieval-Augmented Language Models",

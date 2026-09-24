@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stylometric Code Detection — Paper Library</title>
+<meta name="description" content="FMI_SU_Yotkova_Kastreva at SemEval-2026 Task 13: detecting LLM-generated code with two ratio features, a depth-2 decision tree and two rules — explained with an interactive feature x-ray.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="site-nav">
+  <a class="brand" href="../index.html" style="text-decoration:none;"><span class="dot"></span> Paper Library</a>
+  <nav>
+    <a href="../index.html#papers">All papers</a>
+    <a href="https://aclanthology.org/2026.semeval-1.275/">Paper</a>
+    <a href="https://github.com/violeta-kastreva/SemEvalTask13-SubtaskA">Code</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Paper deep dive</p>
+    <h1>Stylometric Code Detection</h1>
+    <p class="lede">FMI_SU_Yotkova_Kastreva at SemEval-2026 Task 13: Lightweight Detection of LLM-Generated Code via Stylometric Signals — Yotkova, Kastreva, Dimitrov, Koychev, Nakov. SemEval-2026 (ACL), pp. 2179–2186.</p>
+    <p class="paper-links"><a href="https://aclanthology.org/2026.semeval-1.275/">ACL Anthology</a> · <a href="https://aclanthology.org/2026.semeval-1.275.pdf">PDF</a> · <a href="https://github.com/violeta-kastreva/SemEvalTask13-SubtaskA">Code</a></p>
+    <div class="badges">
+      <span class="badge dfs">LLM-generated code</span>
+      <span class="badge bfs">Stylometry</span>
+      <span class="badge ucs">CPU-only</span>
+      <span class="badge ids">SemEval 2026</span>
+    </div>
+  </div>
+</section>
+
+<nav class="toc" aria-label="On this page">
+  <a href="#tldr">TL;DR</a>
+  <a href="#cliff">Encoders vs. shift</a>
+  <a href="#pipeline">Pipeline</a>
+  <a href="#xray">Feature x-ray</a>
+  <a href="#rules">The two rules</a>
+  <a href="#results">Results</a>
+</nav>
+
+<div class="wrap">
+
+  <a class="back-link" href="../index.html#papers">← All papers</a>
+
+  <!-- ===== TL;DR ===== -->
+  <section class="block" id="tldr" style="padding-top:0;">
+    <p class="eyebrow">TL;DR</p>
+    <h2 class="section-title">Human or LLM? Look at the comments.</h2>
+    <p class="section-lede">
+      The task: given a code snippet, say whether a human or an LLM wrote it. The catch is that training data covers three languages and one domain, while the test set adds five <b>unseen languages</b> and two <b>unseen domains</b>.
+    </p>
+    <p class="section-lede">
+      Big pretrained code encoders score ~95–98 macro-F1 on validation and then fall to 25–49 on test. This paper goes the other way: a handful of <b>length-normalized ratios</b> (how much of the snippet is comments, how verb-heavy those comments are, how much raw prose is mixed in), a <b>depth-2 decision tree</b>, and <b>two rules</b> found by reading the data. That reaches <b>67.35 macro-F1</b> on the official test set, trains on a CPU, and is readable end to end.
+    </p>
+
+    <div class="stat-strip cd-stats">
+      <div class="stat"><span class="n">67.35</span><span class="l">Test macro-F1</span></div>
+      <div class="stat"><span class="n">Top 15%</span><span class="l">Official leaderboard</span></div>
+      <div class="stat"><span class="n">2 + 2</span><span class="l">Features + rules</span></div>
+      <div class="stat"><span class="n">CPU</span><span class="l">Training &amp; inference</span></div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:1.6rem;">
+      <table class="summary">
+        <thead><tr><th></th><th>Train (500K)</th><th>Test (500K)</th></tr></thead>
+        <tbody>
+          <tr><td><b>Languages</b></td><td>C++, Python, Java — ~457K of the samples are Python</td><td>+ <b>Go, PHP, C#, C, JavaScript</b> (unseen)</td></tr>
+          <tr><td><b>Domains</b></td><td>Algorithmic snippets</td><td>+ <b>research</b> and <b>production</b> code (unseen)</td></tr>
+          <tr><td><b>Labels</b></td><td>238K human · 262K machine</td><td>Fully human vs. fully machine</td></tr>
+          <tr><td><b>Metric</b></td><td colspan="2">Macro-F1 (Subtask A, binary). There's also a 100K validation set.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== ENCODERS VS SHIFT ===== -->
+  <section class="block" id="cliff">
+    <p class="eyebrow">The problem with big encoders</p>
+    <h2 class="section-title">Great on validation, lost on test</h2>
+    <p class="section-lede">
+      The authors first tried embeddings from three pretrained code models, each with the best downstream classifier. All three nearly solve the validation set and then collapse on the test set. Their explanation is <b>language shift</b>: 91.4% of training snippets are Python, so a model can learn Python-only cues such as indentation habits that mean little in C# or JavaScript.
+    </p>
+
+    <div class="sim-panel">
+      <div class="viz-legend" aria-hidden="true">
+        <span><i class="sw sw-val"></i>Validation</span>
+        <span><i class="sw sw-test"></i>Test</span>
+      </div>
+      <svg id="cliff-chart" class="viz" role="img" aria-labelledby="cliff-title cliff-desc">
+        <title id="cliff-title">Validation vs. test macro-F1</title>
+        <desc id="cliff-desc">GraphCodeBERT drops from 98.21 to 25.11, CodeT5+ encoder from 97.46 to 49.39, CodeRankLLM from 95.27 to 33.65. The paper's final system scores 67.35 on test; its validation score is not reported.</desc>
+      </svg>
+      <details class="viz-table">
+        <summary>Show as table</summary>
+        <table class="summary">
+          <thead><tr><th>Model</th><th>Validation</th><th>Test</th></tr></thead>
+          <tbody>
+            <tr><td>GraphCodeBERT</td><td>98.21</td><td>25.11</td></tr>
+            <tr><td>CodeT5+ encoder</td><td>97.46</td><td>49.39</td></tr>
+            <tr><td>nomicai/CodeRankLLM</td><td>95.27</td><td>33.65</td></tr>
+            <tr><td>This paper (tree + rules)</td><td>not reported</td><td>67.35</td></tr>
+          </tbody>
+        </table>
+      </details>
+    </div>
+    <p class="caption-note">Encoder rows are Table 4 of the paper (encoder test scores come from the paper's development test subset); the final-system score is the official test result. Adding encoder embeddings to the feature pipeline didn't help either: tree importances and regression coefficients gave them almost no weight.</p>
+  </section>
+
+  <!-- ===== PIPELINE ===== -->
+  <section class="block" id="pipeline">
+    <p class="eyebrow">Interactive · click a stage</p>
+    <h2 class="section-title">The pipeline, one small model at a time</h2>
+    <p class="section-lede">Every learned component is small: two TF-IDF classifiers help extract features, and a shallow classifier makes the call. Click a stage to see what it does and how well it works.</p>
+
+    <div class="cd-pipe-wrap">
+      <div class="cd-pipe" id="cd-pipe" role="tablist" aria-label="Pipeline stages">
+        <div class="row"><button class="stage io" data-stage="input">Raw code snippet</button></div>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <div class="row"><button class="stage aux" data-stage="lang">Language classifier</button></div>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <div class="row two"><button class="stage aux" data-stage="cvt">Code-vs-text line classifier</button><button class="stage parse" data-stage="ts">Tree-Sitter parsing</button></div>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <div class="row"><button class="stage feat" data-stage="feat">Feature extraction</button></div>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <div class="row two"><button class="stage ml" data-stage="dt">Decision tree</button><button class="stage ml" data-stage="lr">Logistic regression</button></div>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <div class="row"><button class="stage logic" data-stage="rules">Decision logic + heuristics</button></div>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <div class="row"><button class="stage io" data-stage="out">Human / machine</button></div>
+      </div>
+      <div class="cd-stage-info" id="cd-stage-info" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURE X-RAY ===== -->
+  <section class="block" id="xray">
+    <p class="eyebrow">Interactive · edit the code</p>
+    <h2 class="section-title">Feature x-ray</h2>
+    <p class="section-lede">Pick an example or paste your own code. Each line gets tagged the way the pipeline sees it, and the ratios and rules update as you type.</p>
+
+    <div class="playground">
+      <div class="pg-controls">
+        <div class="toggle-row" id="xr-presets" style="margin:0;"></div>
+      </div>
+      <textarea id="xr-input" class="cd-code" spellcheck="false" aria-label="Code snippet to analyze"></textarea>
+
+      <div class="cd-xray">
+        <div>
+          <div class="frontier-box">
+            <h5>Line tags</h5>
+            <div class="cd-lines" id="xr-lines"></div>
+          </div>
+        </div>
+        <div>
+          <div class="frontier-box">
+            <h5>Ratio features</h5>
+            <div id="xr-feats"></div>
+          </div>
+          <div class="frontier-box">
+            <h5>Rules → verdict</h5>
+            <div id="xr-rules"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="caption-note"><b>Browser approximation.</b> Regex comment detection, a verb keyword list and a punctuation-based prose check stand in for Tree-Sitter, spaCy and the trained line classifier, so values will differ from the real pipeline. The two rules are implemented as the paper describes them. The trained tree's split values aren't published, so snippets no rule catches are left to the tree instead of getting a made-up verdict. The examples are ones we wrote, not samples from the dataset.</p>
+  </section>
+
+  <!-- ===== RULES ===== -->
+  <section class="block" id="rules">
+    <p class="eyebrow">Found by reading the data</p>
+    <h2 class="section-title">The two rules</h2>
+
+    <h3 class="cd-h3">1 · The language name on its own line</h3>
+    <p class="section-lede">
+      Reading the training data by hand, the authors noticed LLM output often starts with a bare <code>python</code> or <code>java</code> line: leftover Markdown from a <code>```python</code> fence with the backticks gone. About <b>5K of the 500K</b> training samples have it. Flagging those gave <b>+0.05 macro-F1</b> over an all-human baseline submission. How often each generator does this varies widely:
+    </p>
+    <div class="sim-panel">
+      <svg id="leak-chart" class="viz" role="img" aria-labelledby="leak-title leak-desc">
+        <title id="leak-title">Markdown leak rate by generator</title>
+        <desc id="leak-desc">Percentage of each model's snippets that contain Markdown formatting: Qwen2.5-Coder-1.5B-Instruct 87.28, Yi-Coder-1.5B-Chat 74.39, Qwen2.5-Coder-7B-Instruct 66.18, Phi-3.5-mini-instruct 59.81, Phi-3-medium-4k-instruct 35.78.</desc>
+      </svg>
+      <p class="caption-note" style="margin-bottom:0;">Leak rate = % of that model's snippets containing Markdown formatting (Table 3). Only the five models listed in the paper are shown.</p>
+    </div>
+
+    <h3 class="cd-h3">2 · Too much prose → machine</h3>
+    <p class="section-lede">
+      The second rule uses the <b>text-like ratio</b>: the share of lines the code-vs-text classifier labels as natural language. Among samples with any prose, the average is <b>0.07</b> for human code and <b>0.17</b> for LLM code, and a Kolmogorov–Smirnov test says the distributions differ (<b>D = 0.40, p &lt; 0.001</b>). The threshold is set well above both averages, at <b>0.3</b>.
+    </p>
+    <div class="sim-panel">
+      <svg id="thresh-chart" class="viz" role="img" aria-labelledby="thr-title thr-desc">
+        <title id="thr-title">Where the text-like threshold sits</title>
+        <desc id="thr-desc">On a 0 to 1 scale: the Youden's J optimum is 0.008, the human mean is 0.07, the LLM mean is 0.17, and the chosen threshold is 0.3.</desc>
+      </svg>
+      <div class="stat-strip cd-stats" style="margin-top:1rem;">
+        <div class="stat"><span class="n">99.9%</span><span class="l">Human code left alone (specificity)</span></div>
+        <div class="stat"><span class="n">10.3%</span><span class="l">LLM samples flagged</span></div>
+      </div>
+      <p class="caption-note" style="margin-bottom:0;">Youden's J would put the cut at 0.008, which catches more LLM code and also flags human code. At 0.3 the rule catches only the most prose-heavy tenth of LLM samples, but almost never mislabels a human. Averages are over non-zero values on the training set.</p>
+    </div>
+  </section>
+
+  <!-- ===== RESULTS ===== -->
+  <section class="block" id="results">
+    <p class="eyebrow">Does it work?</p>
+    <h2 class="section-title">Simpler models generalize better</h2>
+    <p class="section-lede">All rows use the same two features (comment ratio and verb-comment ratio) and are scored on the official test set. The most flexible models, a random forest and an MLP, score lowest. The depth-2 tree plus both rules scores highest.</p>
+
+    <div class="sim-panel">
+      <svg id="results-chart" class="viz" role="img" aria-labelledby="res-title res-desc">
+        <title id="res-title">Test macro-F1 by classifier</title>
+        <desc id="res-desc">Decision tree depth 2 plus heuristics 67.35; decision tree depth 2 65.62; logistic regression with tuned threshold 64.59; linear SVC 63.27; logistic regression 63.16; random forest 62.25; MLP 60.25.</desc>
+      </svg>
+      <details class="viz-table">
+        <summary>Show as table</summary>
+        <table class="summary">
+          <thead><tr><th>Classifier</th><th>Setup</th><th>Test macro-F1</th></tr></thead>
+          <tbody id="results-table"></tbody>
+        </table>
+      </details>
+      <p class="caption-note" style="margin-bottom:0;">The x-axis starts at 55, not 0. The best encoder (49.39) would sit off the left edge. Tables 6 and 7 of the paper.</p>
+    </div>
+
+    <h3 class="cd-h3">What didn't make the cut</h3>
+    <p class="section-lede">About 30 candidate features were tried and ranked by SHAP values and regression coefficients. Most either added little or overfit the training distribution. The paper's feature tables:</p>
+    <div class="table-wrap">
+      <table class="summary">
+        <thead><tr><th>Feature</th><th>What it measures</th><th>In the final system?</th></tr></thead>
+        <tbody>
+          <tr><td><b>Comment ratio</b></td><td>Comment lines ÷ all lines</td><td><span class="cd-pill keep">Tree feature</span></td></tr>
+          <tr><td><b>Verb-comment ratio</b></td><td>Verbs ÷ all words in comment text</td><td><span class="cd-pill keep">Tree feature</span></td></tr>
+          <tr><td><b>Text-like ratio</b></td><td>Prose lines (per the line classifier) ÷ lines</td><td><span class="cd-pill rule">Rule, &gt; 0.3</span></td></tr>
+          <tr><td>Error nodes near EOF</td><td>Share of parse errors in the last 20% of the file, i.e. truncated code</td><td><span class="cd-pill drop">No</span> <span class="cd-sub">+LR: 64.75 val / 63.90 test</span></td></tr>
+          <tr><td>Completeness score</td><td>Qwen2.5-7B judges whether the last line is complete (0 / 0.5 / 1)</td><td><span class="cd-pill drop">No</span> <span class="cd-sub">+LR: 64.14 / 63.26, costly</span></td></tr>
+          <tr><td>Cyclomatic complexity (mean)</td><td>1 + decision points, averaged over functions</td><td><span class="cd-pill drop">No</span> <span class="cd-sub">+LR: 53.59 / 63.16</span></td></tr>
+          <tr><td>Identifier verb ratio</td><td>Verbs among identifier word parts (<code>getUserName</code> → get, user, name)</td><td><span class="cd-pill drop">No</span> <span class="cd-sub">weak signal</span></td></tr>
+          <tr><td>Statements-to-LOC</td><td>Statements ÷ lines of code</td><td><span class="cd-pill drop">No</span> <span class="cd-sub">weak signal</span></td></tr>
+          <tr><td>Comment code-like ratio</td><td>Comment lines that look like code ÷ comment lines</td><td><span class="cd-pill drop">No</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption-note">"+LR" rows are Table 5: that feature added to the two main features under logistic regression. Per-length-bucket decision thresholds also looked great on validation but didn't carry over to test.</p>
+  </section>
+
+  <!-- ===== TAKEAWAY ===== -->
+  <section class="block">
+    <p class="eyebrow">Takeaway</p>
+    <h2 class="section-title">Under distribution shift, pick signals that transfer</h2>
+    <p class="section-lede">
+      Large encoders learn whatever separates the classes in training, and here much of that was Python-specific. Comment density, verb-heavy explanations, stray prose and Markdown leftovers come from how LLMs <i>write</i>, not from which language they write in, so they survive the move to unseen languages and domains. The paper's appendix makes the same point from the model side: extra nonlinearity (random forest, MLP) hurt robustness, and a two-split tree did best.
+    </p>
+    <a class="back-link" href="../index.html#papers">← All papers</a>
+  </section>
+
+</div>
+
+<div class="viz-tip" id="viz-tip" role="tooltip" hidden></div>
+
+<footer>Paper Library by Elitsa Yotkova · built with plain HTML, CSS &amp; JS</footer>
+
+<script src="llm-code-detection.js"></script>
+</body>
+</html>

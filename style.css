@@ -229,7 +229,7 @@ h2.section-title { font-size: 1.7rem; margin: 0 0 0.6rem; }
 .node circle, .node rect { stroke-width: 2.5; transition: all 0.25s ease; cursor: pointer; }
 .node text { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; fill: var(--ink); pointer-events: none; }
 .node.goal circle, .node.goal rect { stroke-dasharray: 4 3; }
-.edge { stroke: #c9c1da; stroke-width: 2; }
+.edge { stroke: #b7bfc7; stroke-width: 2; }
 .edge-label { font-size: 11px; fill: var(--ink-soft); font-weight: 700; }
 .node-info {
   background: color-mix(in srgb, var(--indigo) 6%, var(--surface));
@@ -317,7 +317,7 @@ input[type="range"] { width: 100%; accent-color: var(--indigo); }
   border-radius: 8px;
   font-weight: 700;
   font-size: 0.82rem;
-  background: #fff;
+  background: var(--surface);
   border: 1.5px solid var(--line);
 }
 .log-box { max-height: 190px; overflow-y: auto; font-size: 0.85rem; }
@@ -327,11 +327,11 @@ input[type="range"] { width: 100%; accent-color: var(--indigo); }
 .log-box p.iter { text-align: center; font-weight: 800; color: var(--ids); background: none; margin: 0.7rem 0 0.3rem; padding: 0; }
 .ids-readout { display: inline-flex; align-items: center; gap: 0.5rem; background: color-mix(in srgb, var(--ids) 10%, var(--surface)); border: 1px solid var(--ids); border-radius: 999px; padding: 0.4rem 0.9rem; font-weight: 800; font-size: 0.88rem; color: var(--ids); margin-bottom: 0.8rem; }
 
-.node.visited circle, .node.visited rect { fill: color-mix(in srgb, var(--indigo) 14%, #fff); }
+.node.visited circle, .node.visited rect { fill: color-mix(in srgb, var(--indigo) 14%, var(--surface)); }
 .node.current circle, .node.current rect { fill: var(--amber); }
-.node.frontier circle, .node.frontier rect { fill: #fff; stroke: var(--indigo); }
+.node.frontier circle, .node.frontier rect { fill: var(--surface); stroke: var(--indigo); }
 .node.found circle, .node.found rect { fill: var(--teal); }
-.node.fail circle, .node.fail rect { fill: color-mix(in srgb, var(--coral) 20%, #fff); stroke: var(--coral); }
+.node.fail circle, .node.fail rect { fill: color-mix(in srgb, var(--coral) 20%, var(--surface)); stroke: var(--coral); }
 
 /* ---- summary table ---- */
 .table-wrap { overflow-x: auto; border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--line); }
@@ -663,3 +663,9 @@ a.lib-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); text-
   .hero .stats { gap: 1.4rem; }
   .paper-grid { grid-template-columns: 1fr; }
 }
+
+/* ===================================================================
+   Paper pages
+   =================================================================== */
+.paper-links { font-size: 0.88rem; font-weight: 600; color: var(--ink-soft); margin: -0.4rem 0 0.4rem; }
+.paper-links a { font-weight: 700; }

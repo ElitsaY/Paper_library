@@ -25,7 +25,6 @@ window.PAPERS = [
     hook: "Proving theorems in Lean as best-first search: a language model proposes proof steps, and a retriever narrows 130k mathlib premises down to the 100 that matter.",
     interactive: "Step through a proof-search tree and watch the frontier re-rank.",
     topics: ["Theorem proving", "Search", "Retrieval", "LLMs"],
-    accent: "coral",
-    url: "https://elitsay.github.io/AI_FMI_course/docs/papers/leandojo.html"
+    accent: "coral"
   }
 ];

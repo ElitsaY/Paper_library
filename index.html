@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paper Library — Elitsa Yotkova</title>
+<meta name="description" content="Research papers, explained with interactive visualizations: step through the algorithm, poke at the numbers, see why it works.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-nav">
+  <span class="brand"><span class="dot"></span> Paper Library</span>
+  <nav>
+    <a href="#papers">Papers</a>
+    <a href="#how">How it works</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Paper deep dives</p>
+    <h1>Papers you can click around in</h1>
+    <p class="lede">Research papers, one page each: the idea in plain words, the method as something you can step through, and the results as numbers you can actually read.</p>
+    <div class="stats">
+      <div><span class="n" id="stat-papers">–</span><span class="l">Papers</span></div>
+      <div><span class="n" id="stat-topics">–</span><span class="l">Topics</span></div>
+      <div><span class="n" id="stat-years">–</span><span class="l">Years</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+
+  <section class="block" id="papers" style="padding-top:1.4rem;">
+    <div class="lib-controls">
+      <label class="lib-search">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></svg>
+        <input id="lib-search" type="search" placeholder="Search title, author, venue, topic…  ( / )" autocomplete="off" aria-label="Search papers">
+      </label>
+      <div class="topic-row" id="topic-row" role="group" aria-label="Filter by topic"></div>
+      <p class="result-note" id="result-note" aria-live="polite"></p>
+    </div>
+
+    <div class="paper-grid" id="paper-grid"></div>
+  </section>
+
+  <section class="block" id="how">
+    <p class="eyebrow">How each page works</p>
+    <h2 class="section-title">Anatomy of a deep dive</h2>
+    <p class="section-lede">Every paper page follows the same shape, so you know where to look.</p>
+    <div class="anatomy">
+      <div style="--c:var(--coral)"><b>TL;DR</b><span>What the paper does and what problem it fixes, in two short paragraphs.</span></div>
+      <div style="--c:var(--teal)"><b>Reframing</b><span>The method mapped onto ideas you already know: a table, not jargon.</span></div>
+      <div style="--c:var(--amber)"><b>Interactive</b><span>Step through the algorithm or play with the key quantity yourself.</span></div>
+      <div style="--c:var(--indigo)"><b>Results</b><span>The headline numbers, charted, with what they do and don't show.</span></div>
+      <div style="--c:var(--violet)"><b>Takeaway</b><span>The one idea worth remembering after you close the tab.</span></div>
+    </div>
+    <p class="caption-note">Figures marked <i>illustrative</i> are simplified examples built to show the mechanism; numbers from the paper are labelled as such.</p>
+  </section>
+
+</div>
+
+<footer>Paper Library by Elitsa Yotkova · built with plain HTML, CSS &amp; JS</footer>
+
+<script src="papers.js"></script>
+<script src="library.js"></script>
+</body>
+</html>

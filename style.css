@@ -816,3 +816,121 @@ section.block[id] { scroll-margin-top: 110px; }
   .cd-lines .ln { grid-template-columns: 50px 1fr; gap: 0.35rem; }
   .cd-lines .tag { font-size: 0.56rem; }
 }
+
+/* shared chart bits used by several papers */
+svg.viz .bar.hl { fill: var(--viz-b); }
+svg.viz .bar.muted { fill: var(--viz-neutral); }
+svg.viz .chance { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 3 3; }
+svg.viz .ci { stroke: var(--ink); stroke-width: 1.5; }
+svg.viz .series { fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+svg.viz .series.a { stroke: var(--viz-a); }
+svg.viz .series.b { stroke: var(--viz-b); }
+svg.viz .ref { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 4 3; }
+svg.viz .ref-label { font-size: 11px; font-weight: 700; fill: var(--ink-soft); }
+svg.viz .cur { stroke: var(--ink); stroke-width: 1.5; }
+svg.viz .cross { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
+
+/* ===================================================================
+   Paper: CAP — open QA correctness
+   =================================================================== */
+.cap-fig1 { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 1.2rem 1.3rem; margin: 0 0 1.6rem; max-width: 760px; }
+.cap-fig1 p { margin: 0 0 0.5rem; }
+.cap-fig1 .k, .cap-ex .k { display: inline-block; min-width: 86px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
+.cap-fig1 .g { font-weight: 700; }
+.cap-fig1-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 0.8rem; }
+@media (max-width: 640px) { .cap-fig1-rows { grid-template-columns: 1fr; } }
+.cap-fig1 .ans { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0.75rem 0.85rem; }
+.cap-fig1 .ans .lab { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.1rem 0.5rem; border-radius: 999px; }
+.cap-fig1 .ans.bad .lab { color: var(--viz-b); border: 1px solid color-mix(in srgb, var(--viz-b) 50%, transparent); }
+.cap-fig1 .ans.good .lab { color: var(--teal); border: 1px solid color-mix(in srgb, var(--teal) 50%, transparent); }
+.cap-fig1 .ans p { margin: 0.5rem 0 0.6rem; font-size: 0.95rem; }
+.cap-fig1 dl { display: flex; gap: 0.5rem; margin: 0; flex-wrap: wrap; }
+.cap-fig1 dl div { flex: 1; min-width: 70px; text-align: center; background: color-mix(in srgb, var(--ink) 4%, var(--surface)); border-radius: 8px; padding: 0.3rem 0.2rem; }
+.cap-fig1 dl div.cap { background: color-mix(in srgb, var(--viz-a) 14%, var(--surface)); }
+.cap-fig1 dt { font-size: 0.66rem; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; }
+.cap-fig1 dd { margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.05rem; }
+.cap-fig1 .src { font-size: 0.75rem; color: var(--ink-soft); margin: 0.7rem 0 0; }
+
+/* taxonomy explorer */
+.cap-tax { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 1.4rem; align-items: start; }
+@media (max-width: 760px) { .cap-tax { grid-template-columns: 1fr; } }
+.cap-ladder { list-style: none; margin: 0; padding: 0; }
+.cap-ladder li.rel { text-align: center; font-weight: 800; color: var(--ink-soft); line-height: 1; padding: 0.15rem 0; font-size: 0.95rem; }
+.cap-rung {
+  width: 100%; font: inherit; color: var(--ink); text-align: left; cursor: pointer;
+  display: grid; grid-template-columns: 30px 1fr; grid-template-rows: auto auto; column-gap: 0.6rem;
+  padding: 0.5rem 0.75rem; border-radius: 10px;
+  background: var(--surface); border: 1.5px solid var(--line);
+  border-left: 5px solid color-mix(in srgb, var(--viz-b) calc(var(--t) * 100%), var(--teal));
+  transition: all 0.15s ease;
+}
+.cap-rung:hover { border-color: var(--indigo); border-left-color: color-mix(in srgb, var(--viz-b) calc(var(--t) * 100%), var(--teal)); }
+.cap-rung.active { background: color-mix(in srgb, var(--indigo) 9%, var(--surface)); border-color: var(--indigo); border-left-color: color-mix(in srgb, var(--viz-b) calc(var(--t) * 100%), var(--teal)); box-shadow: var(--shadow-sm); }
+.cap-rung .num { grid-row: 1 / 3; align-self: center; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1rem; color: var(--ink-soft); text-align: center; }
+.cap-rung .nm { font-weight: 800; font-size: 0.9rem; }
+.cap-rung .df { font-size: 0.76rem; color: var(--ink-soft); line-height: 1.35; }
+.cap-tax-info {
+  position: sticky; top: 130px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow-sm); padding: 1.2rem 1.3rem; font-size: 0.9rem;
+}
+.cap-tax-info h4 { margin: 0 0 0.2rem; font-size: 1.2rem; }
+.cap-tax-info .def { margin: 0 0 0.8rem; color: var(--ink-soft); }
+.cap-tax-info dl { margin: 0.8rem 0 0; }
+.cap-tax-info dt { font-weight: 700; color: var(--indigo); margin-top: 0.55rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.cap-tax-info dd { margin: 0.1rem 0 0; }
+.cap-ex { background: color-mix(in srgb, var(--ink) 3%, var(--surface)); border: 1px dashed var(--line); border-radius: var(--radius-sm); padding: 0.7rem 0.85rem; }
+.cap-ex p { margin: 0 0 0.3rem; display: grid; grid-template-columns: 86px 1fr; }
+.cap-ex .k { min-width: 0; padding-top: 0.15rem; }
+.cap-ex .pred { font-weight: 700; }
+.cap-ex .stmt { font-style: italic; color: var(--ink-soft); font-size: 0.86rem; }
+.cap-ex .src { display: block; font-size: 0.72rem; color: var(--ink-soft); margin: 0.45rem 0 0; }
+
+/* formula + calculator */
+.cap-formula { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0.9rem 1.1rem; margin: 0 0 1.2rem; font-size: 1rem; }
+.cap-formula div { margin: 0.2rem 0; font-family: 'Poppins', sans-serif; font-weight: 600; }
+.cap-formula .lhs { display: inline-block; min-width: 88px; }
+.cap-formula .alp, .cap-formula .lam { color: var(--viz-b); }
+.cap-formula p { margin: 0.45rem 0 0; font-size: 0.8rem; color: var(--ink-soft); }
+.cap-ctl-label { font-size: 0.82rem; font-weight: 700; color: var(--ink-soft); }
+.cap-dirs { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem; }
+@media (max-width: 640px) { .cap-dirs { grid-template-columns: 1fr; } }
+.cap-dir { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0.9rem 1rem; background: color-mix(in srgb, var(--ink) 2%, var(--surface)); }
+.cap-dir h5 { margin: 0; font-size: 0.95rem; font-family: 'Poppins', sans-serif; }
+.cap-dir .sub { margin: 0.15rem 0 0.6rem; font-size: 0.76rem; color: var(--ink-soft); }
+.cap-dir .slider-group { margin-top: 0.5rem; }
+.cap-dir .slider-group label { font-size: 0.8rem; margin-bottom: 0.15rem; }
+.cap-stack { display: flex; height: 14px; border-radius: 999px; overflow: hidden; gap: 2px; background: var(--surface); }
+.cap-stack i { display: block; height: 100%; transition: width 0.2s ease; }
+.cap-stack .e { background: var(--viz-a); }
+.cap-stack .n { background: var(--viz-neutral); }
+.cap-stack .c { background: var(--viz-b); }
+.cap-dir .contra { font-size: 0.8rem; margin: 0.4rem 0 0; }
+.cap-dir .contra span { color: var(--ink-soft); }
+.cap-dir .dval { margin: 0.5rem 0 0; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.cap-hyper { margin-bottom: 1rem; }
+.cap-result { border-top: 1px solid var(--line); padding-top: 0.9rem; }
+.cap-meter-big { height: 16px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.cap-meter-big .fill { height: 100%; background: var(--viz-a); border-radius: 999px; transition: width 0.2s ease; }
+.cap-eq { margin: 0.6rem 0 0; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.cap-eq b { font-family: 'Poppins', sans-serif; font-size: 1.2rem; }
+.cap-best td { background: color-mix(in srgb, var(--viz-b) 9%, transparent); }
+
+/* results */
+.cap-measure-note { font-size: 0.82rem; color: var(--ink-soft); margin: 0 0 0.6rem; }
+.cap-pairs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; }
+@media (max-width: 760px) { .cap-pairs { grid-template-columns: 1fr; } }
+.cap-pair { padding: 0.9rem 1rem 0.6rem; }
+.cap-pair h5 { margin: 0 0 0.4rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif; }
+.cap-viol { margin: 0.6rem 0 0; font-size: 0.9rem; }
+.cap-viol span { color: var(--ink-soft); font-size: 0.8rem; }
+.viz-legend { flex-wrap: wrap; }
+.viz-legend .sw-dash { display: inline-block; width: 14px; height: 0; border-top: 1.5px dashed var(--ink-soft); margin-right: 0.4rem; vertical-align: 3px; }
+.viz-legend .sw-ring { display: inline-block; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--ink); margin-right: 0.4rem; vertical-align: 0; }
+.cap-fig1 p.q, .cap-fig1 p.g { display: grid; grid-template-columns: 86px 1fr; align-items: baseline; }
+.cap-fig1 p.q .k, .cap-fig1 p.g .k { min-width: 0; }
+.cap-tax-info { scroll-margin-top: 120px; }
+.cap-ex .stmt .k { text-transform: none; font-size: 0.85rem; font-style: italic; }
+.cap-key { display: flex; gap: 0.8rem; flex-wrap: wrap; font-size: 0.72rem; color: var(--ink-soft); margin: 0.35rem 0 0; }
+.cap-key i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 0.3rem; vertical-align: -1px; }
+.cap-key .e { background: var(--viz-a); } .cap-key .n { background: var(--viz-neutral); } .cap-key .c { background: var(--viz-b); }

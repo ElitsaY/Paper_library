@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAP: Open QA Correctness — Paper Library</title>
+<meta name="description" content="How Correct Is Your Answer? An eight-class correctness taxonomy for open QA and CAP, a bidirectional-NLI metric, explained with a taxonomy explorer, a live CAP calculator and the paper's results.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="site-nav">
+  <a class="brand" href="../index.html" style="text-decoration:none;"><span class="dot"></span> Paper Library</a>
+  <nav>
+    <a href="../index.html#papers">All papers</a>
+    <a href="https://arxiv.org/abs/2609.01369">arXiv</a>
+    <a href="https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-">Code</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Paper deep dive</p>
+    <h1>How Correct Is Your Answer?</h1>
+    <p class="lede">A Semantic Correctness Framework for Open QA Evaluation — Yotkova, Kastreva, Velkov, Boyanov, Dimitrov, Nakov, Koychev. arXiv preprint, September 2026.</p>
+    <p class="paper-links"><a href="https://arxiv.org/abs/2609.01369">arXiv</a> · <a href="https://arxiv.org/pdf/2609.01369">PDF</a> · <a href="https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-">Code &amp; data</a></p>
+    <div class="badges">
+      <span class="badge ids">QA evaluation</span>
+      <span class="badge bfs">NLI</span>
+      <span class="badge ucs">8-class taxonomy</span>
+      <span class="badge dfs">New metric: CAP</span>
+    </div>
+  </div>
+</section>
+
+<nav class="toc" aria-label="On this page">
+  <a href="#tldr">TL;DR</a>
+  <a href="#taxonomy">Taxonomy</a>
+  <a href="#cap">How CAP works</a>
+  <a href="#asymmetry">The α trade-off</a>
+  <a href="#results">Results</a>
+  <a href="#ladder">Class means</a>
+</nav>
+
+<div class="wrap">
+
+  <a class="back-link" href="../index.html#papers">← All papers</a>
+
+  <!-- ===== TL;DR ===== -->
+  <section class="block" id="tldr" style="padding-top:0;">
+    <p class="eyebrow">TL;DR</p>
+    <h2 class="section-title">"Right or wrong" is too coarse for free-form answers</h2>
+    <p class="section-lede">
+      A free-form answer can be right in many wordings. It can also be wrong in different ways: incomplete, padded with made-up facts, or flatly contradictory. Similarity metrics like BLEU, BERTScore and COMET mostly measure how much two texts <i>look</i> alike, so they can rate a contradiction almost perfectly:
+    </p>
+
+    <div class="cap-fig1">
+      <p class="q"><span class="k">Question</span>At what temperature does water boil?</p>
+      <p class="g"><span class="k">Gold</span>Water boils at 100 degrees Celsius.</p>
+      <div class="cap-fig1-rows">
+        <div class="ans bad">
+          <span class="lab">contradictory</span>
+          <p>Water boils at 0 degrees Celsius.</p>
+          <dl><div><dt>BERTScore</dt><dd>0.99</dd></div><div><dt>COMET</dt><dd>0.99</dd></div><div class="cap"><dt>CAP</dt><dd>0.01</dd></div></dl>
+        </div>
+        <div class="ans good">
+          <span class="lab">equivalent</span>
+          <p>The boiling point of water is one hundred degrees Celsius.</p>
+          <dl><div><dt>BERTScore</dt><dd>0.90</dd></div><div><dt>COMET</dt><dd>0.87</dd></div><div class="cap"><dt>CAP</dt><dd>0.99</dd></div></dl>
+        </div>
+      </div>
+      <p class="src">Figure 1 of the paper.</p>
+    </div>
+
+    <p class="section-lede">
+      The paper contributes three reusable pieces: an <b>eight-class correctness taxonomy</b> with an intended ordering; <b>two datasets</b> (CAP-Correctness, 8.8K labeled answers; CAP-Statements, 11K question-to-statement examples); and <b>CAP (Context-Aware Precision)</b>, a metric that rewrites the gold and predicted answers as statements and checks <b>entailment in both directions</b> with an NLI model. Metrics are judged by whether their scores keep the taxonomy's order.
+    </p>
+
+    <div class="stat-strip cd-stats">
+      <div class="stat"><span class="n">60.37</span><span class="l">Spearman ρ, CAP (COMET: 26.88)</span></div>
+      <div class="stat"><span class="n">77.70%</span><span class="l">Pairwise ranking accuracy</span></div>
+      <div class="stat"><span class="n">4 / 25</span><span class="l">Order violations (COMET: 9)</span></div>
+      <div class="stat"><span class="n">8.8K + 11K</span><span class="l">Released examples</span></div>
+    </div>
+  </section>
+
+  <!-- ===== TAXONOMY ===== -->
+  <section class="block" id="taxonomy">
+    <p class="eyebrow">Interactive · click a class</p>
+    <h2 class="section-title">Eight ways an answer can relate to the gold</h2>
+    <p class="section-lede">Classes run from most to least correct. The symbols between rows are the paper's ordering (Eq. 1): "≈" means equally good, "≥" means no worse, and "&gt;" means strictly better. Each example is a real CAP-Correctness row whose synthetic label a human annotator confirmed.</p>
+
+    <div class="cap-tax">
+      <ol class="cap-ladder" id="cap-ladder" role="tablist" aria-label="Correctness classes"></ol>
+      <div class="cap-tax-info" id="cap-tax-info" aria-live="polite"></div>
+    </div>
+    <p class="caption-note">The paper frames the ordering as a design choice. Neighbors such as partial and overinclusive-valid "may be adapted to application-specific preferences." CAP-Correctness has ~1,000 examples per class. Candidate answers were generated with Claude Haiku 4.5, one prompt per class. On 1,638 human-relabeled examples, human–LLM agreement is κ = 0.779 (quadratic-weighted 0.879).</p>
+  </section>
+
+  <!-- ===== HOW CAP WORKS ===== -->
+  <section class="block" id="cap">
+    <p class="eyebrow">Interactive · move the sliders</p>
+    <h2 class="section-title">How CAP scores an answer</h2>
+    <p class="section-lede">
+      <b>1.</b> A fine-tuned mT5-small rewrites (question, gold) and (question, prediction) as declarative statements, <i>s<sub>g</sub></i> and <i>s<sub>p</sub></i>. <b>2.</b> An NLI model (DeBERTa-v3-large) reads each statement pair <b>in both directions</b> and outputs entailment, neutral and contradiction probabilities. <b>3.</b> Each direction gets a score: entailment plus a fraction λ of neutral. <b>4.</b> The two directions are mixed with weight α.
+    </p>
+
+    <div class="cap-formula" aria-label="CAP formula">
+      <div><span class="lhs">D(a → b)</span> = P<sub>ent</sub>(a → b) + <b class="lam">λ</b> · P<sub>neu</sub>(a → b)</div>
+      <div><span class="lhs">CAP</span> = <b class="alp">α</b> · D(s<sub>g</sub> → s<sub>p</sub>) + (1 − <b class="alp">α</b>) · D(s<sub>p</sub> → s<sub>g</sub>)</div>
+      <p>Paper setting: α = 0.85, λ = 0.30. Always in [0, 1].</p>
+    </div>
+
+    <div class="playground">
+      <div class="pg-controls">
+        <span class="cap-ctl-label">Load a pattern:</span>
+        <div class="toggle-row" id="calc-presets" style="margin:0;"></div>
+      </div>
+
+      <div class="cap-dirs">
+        <div class="cap-dir" id="dir-gp"></div>
+        <div class="cap-dir" id="dir-pg"></div>
+      </div>
+
+      <div class="sliders cap-hyper">
+        <div class="slider-group">
+          <label for="alpha">α: weight on gold → prediction <span class="val" id="alpha-val"></span></label>
+          <input type="range" id="alpha" min="0" max="1" step="0.01" value="0.85">
+        </div>
+        <div class="slider-group">
+          <label for="lambda">λ: credit for "neutral" <span class="val" id="lambda-val"></span></label>
+          <input type="range" id="lambda" min="0" max="1" step="0.01" value="0.3">
+        </div>
+      </div>
+
+      <div class="cap-result" id="cap-result" aria-live="polite"></div>
+    </div>
+    <p class="caption-note"><b>Illustrative inputs.</b> The formula is the paper's, but the preset NLI probabilities are made-up examples of each pattern the paper describes, not real model outputs. The results are still close to the paper's class averages (partial ≈ 0.84, overinclusive-valid ≈ 0.50).</p>
+  </section>
+
+  <!-- ===== ASYMMETRY ===== -->
+  <section class="block" id="asymmetry">
+    <p class="eyebrow">The key design trade-off</p>
+    <h2 class="section-title">Why α = 0.85 ranks partial above overinclusive-valid</h2>
+    <p class="section-lede">
+      A <b>partial</b> answer ("water" for "solid water") is <i>entailed by</i> the gold, so the heavily weighted gold → prediction direction scores it high. An <b>overinclusive-valid</b> answer (the gold plus a true extra fact) is the mirror image: it entails the gold, but the gold doesn't entail the extras, so that direction mostly returns "neutral". Weighting gold → prediction at 0.85 therefore puts partial above overinclusive-valid, the opposite of the taxonomy's order. The chart shows CAP for both patterns as α varies:
+    </p>
+    <div class="sim-panel">
+      <div class="viz-legend" aria-hidden="true">
+        <span><i class="sw sw-val"></i>Partial-like</span>
+        <span><i class="sw sw-test"></i>Overinclusive-valid-like</span>
+        <span><i class="sw-dash"></i>paper's α = 0.85</span>
+        <span><i class="sw-ring"></i><span id="alpha-cross"></span></span>
+      </div>
+      <svg id="alpha-chart" class="viz" role="img" aria-labelledby="alpha-title alpha-desc">
+        <title id="alpha-title">CAP as a function of α for the two patterns</title>
+        <desc id="alpha-desc">Two lines cross near α ≈ 0.5. Above the crossing, the partial pattern scores higher; at the paper's α = 0.85 partial scores about 0.84 and overinclusive-valid about 0.47.</desc>
+      </svg>
+      <p class="caption-note" style="margin-bottom:0;">Uses the calculator's two illustrative presets and follows the λ slider above. The paper keeps α = 0.85 because it gave the best global ranking (Spearman, pairwise accuracy) in its sweep. Its hard-pair test confirms the cost: CAP gets only <b>16.34%</b> on "overinclusive-valid &gt; partial", the worst of any metric.</p>
+    </div>
+
+    <div class="table-wrap" style="margin-top:1.4rem;">
+      <table class="summary">
+        <thead><tr><th>α</th><th>λ</th><th>Spearman ρ</th><th>Pairwise acc.</th><th>Violations</th></tr></thead>
+        <tbody>
+          <tr><td>0.30</td><td>0.0</td><td>54.20</td><td>74.16</td><td>4 / 25</td></tr>
+          <tr><td>0.50</td><td>0.0</td><td>56.36</td><td>75.33</td><td>4 / 25</td></tr>
+          <tr><td>0.50</td><td>0.3</td><td>57.96</td><td>76.20</td><td>4 / 25</td></tr>
+          <tr><td>0.70</td><td>0.3</td><td>59.33</td><td>76.92</td><td>4 / 25</td></tr>
+          <tr class="cap-best"><td><b>0.85</b></td><td><b>0.3</b></td><td><b>59.41</b></td><td><b>76.97</b></td><td>4 / 25</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption-note">Hyperparameter sweep on the 1,000-example validation split (Table 12).</p>
+  </section>
+
+  <!-- ===== RESULTS ===== -->
+  <section class="block" id="results">
+    <p class="eyebrow">Does it work?</p>
+    <h2 class="section-title">Which metrics keep the order?</h2>
+    <p class="section-lede">Every metric scores all 7,827 test answers, and each measure checks agreement with the taxonomy's order. Lexical metrics and BERTScore are close to random. COMET does better. CAP roughly doubles COMET's rank correlation.</p>
+
+    <div class="sim-panel">
+      <div class="toggle-row" id="res-measure" style="margin:0 0 0.8rem;"></div>
+      <p class="cap-measure-note" id="res-note"></p>
+      <svg id="res-chart" class="viz" role="img" aria-labelledby="res-title res-desc">
+        <title id="res-title">Metric agreement with the taxonomy ordering</title>
+        <desc id="res-desc">Spearman ρ: BLEU 10.95, ROUGE-L 16.67, METEOR 14.70, BERTScore 16.10, COMET 26.88, CAP 60.37. Pairwise accuracy: 51.57, 55.35, 53.71, 56.18, 61.10, 77.70. Violations out of 25: 14, 12, 12, 11, 9, 4.</desc>
+      </svg>
+      <details class="viz-table">
+        <summary>Show as table</summary>
+        <table class="summary">
+          <thead><tr><th>Metric</th><th>Spearman ρ [95% CI]</th><th>Kendall τ [95% CI]</th><th>Pairwise acc.</th><th>Violations</th></tr></thead>
+          <tbody id="res-table"></tbody>
+        </table>
+      </details>
+      <p class="caption-note" style="margin-bottom:0;">Tables 2, 13 and 14. Intervals are 95% bootstrap CIs (10,000 resamples). Pairwise accuracy is the share of class-ordered answer pairs where the better answer scores higher; chance is 50%.</p>
+    </div>
+
+    <h3 class="cd-h3">Hard neighbors: where metrics break</h3>
+    <p class="section-lede">Global numbers are carried by easy, far-apart pairs (CAP: 98.24 AUC on exact vs. invalid). Restricting to <b>adjacent</b> classes, most baselines fall to chance or below:</p>
+    <div class="cap-pairs" id="pairs-grid"></div>
+    <p class="caption-note">Table 4: pairwise ranking accuracy on hard neighboring pairs. The dashed line is chance (50%). CAP wins three of the four pairs. On overinclusive-valid &gt; partial it scores worst of all, which is the α trade-off shown above.</p>
+  </section>
+
+  <!-- ===== CLASS MEANS LADDER ===== -->
+  <section class="block" id="ladder">
+    <p class="eyebrow">Interactive · switch the label source</p>
+    <h2 class="section-title">Mean CAP per class: does it go down in order?</h2>
+    <p class="section-lede">A metric that respects the taxonomy should score each class, on average, below the classes above it. Rows are in taxonomy order, and any class that scores above a class ranked higher is flagged. The last three sources are real zero-shot answers from three LLMs (1,000 questions each), labeled by humans.</p>
+
+    <div class="sim-panel">
+      <div class="toggle-row" id="lad-source" style="margin:0 0 0.9rem;"></div>
+      <svg id="lad-chart" class="viz" role="img" aria-labelledby="lad-title lad-desc">
+        <title id="lad-title">Mean CAP score per correctness class</title>
+        <desc id="lad-desc">Dot plot of mean CAP (0–100) for each of the eight classes, for the selected label source.</desc>
+      </svg>
+      <p class="cap-viol" id="lad-viol" aria-live="polite"></p>
+      <p class="caption-note" style="margin-bottom:0;">Tables 5, 6 and 17. The violation counts are computed here from the class means and match the paper (4 synthetic, 4 human, 4 GPT-4o, 6 Gemini, 2 Qwen). For LLM answers, "n" is the number of answers in the class. Some classes are tiny (6 overinclusive-invalid answers for GPT-4o), so their means are noisy.</p>
+    </div>
+
+    <p class="section-lede" style="margin-top:1.6rem;">Two failures repeat across sources. <b>Alternative-correct</b> is always too low: a valid different answer ("heat" instead of "electricity") neither entails nor is entailed by the gold, so NLI can't reward it without world knowledge. <b>Partial</b> tends to sit high, for the α reason above. The distribution itself is also informative: Gemini 2.0 Flash gives 251 partial answers out of 1,000, against 37 for GPT-4o.</p>
+  </section>
+
+  <!-- ===== STATEMENTS ===== -->
+  <section class="block" id="statements">
+    <p class="eyebrow">The hidden dependency</p>
+    <h2 class="section-title">Statement generation</h2>
+    <p class="section-lede">CAP only works if the statements are faithful. mT5-small is fine-tuned on CAP-Statements (8,800 / 1,100 / 1,100 split; triples generated with Claude Sonnet 4.6). On its test set it reaches 96.64 BLEU, 98.08 ROUGE-L and 76.7% exact match. In a manual check of 1,353 generated statements, 90.0% were correct. The errors cluster in one question type:</p>
+    <div class="table-wrap">
+      <table class="summary">
+        <thead><tr><th>Question type</th><th>Example</th><th>Syntactic</th><th>Semantic</th><th>Wrong</th></tr></thead>
+        <tbody>
+          <tr><td>Short question</td><td>What gas do plants release during photosynthesis?</td><td>3.0%</td><td>0.6%</td><td>10.5%</td></tr>
+          <tr><td><b>Long context</b></td><td>I have a shirt that is now too small, what can I do to conserve and reuse the fabric?</td><td>3.6%</td><td><b>9.6%</b></td><td><b>32.9%</b></td></tr>
+          <tr><td>Sentence completion</td><td>The sun is responsible for…</td><td>0.2%</td><td>0.0%</td><td>0.0%</td></tr>
+          <tr><td>Blank-space task</td><td>Light bends when it passes from air into ______ at an angle.</td><td>0.4%</td><td>0.0%</td><td>0.0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption-note">Tables 10 and 15. Most "wrong" outputs just glue the question and answer together instead of rewriting them. You can see this in the dataset's own statements (e.g. "A hawk would prefer this for lunch A bison."). On long-context questions, those errors carry straight into the CAP score.</p>
+  </section>
+
+  <!-- ===== TAKEAWAY ===== -->
+  <section class="block">
+    <p class="eyebrow">Takeaway</p>
+    <h2 class="section-title">Grade how an answer relates to the gold, not how much it looks like it</h2>
+    <p class="section-lede">
+      Checking entailment in both directions separates "says the same thing" from "says less" and "says more". A taxonomy with an explicit order turns metric evaluation into a checkable question: do scores go down as answers get worse? CAP answers yes more often than any baseline tested, but not always. Its remaining failures (alternative answers, partial vs. verbose) come from whole-statement NLI, and the authors suggest atomic-fact entailment as the next step. The benchmark and the monotonicity test can be reused for any future metric.
+    </p>
+    <a class="back-link" href="../index.html#papers">← All papers</a>
+  </section>
+
+</div>
+
+<footer>Paper Library by Elitsa Yotkova · built with plain HTML, CSS &amp; JS</footer>
+
+<script src="viz.js"></script>
+<script src="cap-qa-correctness.js"></script>
+</body>
+</html>

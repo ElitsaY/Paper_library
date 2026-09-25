@@ -16,6 +16,18 @@
 */
 window.PAPERS = [
   {
+    id: "cap-qa-correctness",
+    title: "CAP: How Correct Is Your Answer?",
+    fullTitle: "How Correct Is Your Answer? A Semantic Correctness Framework for Open QA Evaluation",
+    authors: "Yotkova, Kastreva, Velkov, Boyanov, Dimitrov, Nakov, Koychev",
+    venue: "arXiv",
+    year: 2026,
+    hook: "An eight-class ordering of how answers can be right or wrong, and CAP, a bidirectional-NLI metric with over twice the rank correlation of COMET (60.37 vs. 26.88 Spearman).",
+    interactive: "Browse real examples of each class, move α and λ in a live CAP calculator, and watch per-class means fall in order (or not).",
+    topics: ["QA evaluation", "NLI", "Benchmarks", "LLMs"],
+    accent: "blue"
+  },
+  {
     id: "llm-code-detection",
     title: "Stylometric Code Detection",
     fullTitle: "FMI_SU_Yotkova_Kastreva at SemEval-2026 Task 13: Lightweight Detection of LLM-Generated Code via Stylometric Signals",
